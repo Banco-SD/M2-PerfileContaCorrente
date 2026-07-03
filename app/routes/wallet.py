@@ -38,6 +38,15 @@ def get_wallet_statement(user_id: UUID, db: Session = Depends(get_db)) -> List[W
     return [WalletStatementItem.from_orm(item) for item in statements]
 
 
+@router.post("/get-or-create/{user_id}", response_model=WalletResponse)
+def get_or_create_wallet(user_id: UUID, db: Session = Depends(get_db)) -> WalletResponse:
+    logger.info("Consultando ou criando carteira para usuário %s", user_id)
+    service = WalletService(WalletRepository())
+    wallet = service.get_or_create_wallet(db, user_id)
+    logger.info("Carteira garantida para usuário %s", user_id)
+    return WalletResponse(user_id=wallet.user_id, saldo=wallet.saldo, status=wallet.status)
+
+
 @router.post("/debit", response_model=WalletResponse)
 def debit_wallet(payload: WalletTransactionRequest, db: Session = Depends(get_db)) -> WalletResponse:
     logger.info("Débito iniciado para usuário %s valor %s", payload.user_id, payload.valor)

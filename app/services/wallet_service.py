@@ -24,6 +24,13 @@ class WalletService:
             raise WalletNotFoundException(detail="Usuário não encontrado")
         return wallet
 
+    def get_or_create_wallet(self, db: Session, user_id: UUID) -> Wallet:
+        try:
+            return self.repository.get_or_create_wallet(db, user_id)
+        except Exception:
+            db.rollback()
+            raise
+
     def get_statement(self, db: Session, user_id: UUID):
         wallet = self.get_wallet(db, user_id)
         return self.repository.get_statements_by_wallet_id(db, wallet.id)
