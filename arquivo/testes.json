@@ -1,0 +1,83 @@
+{
+  "tests": [
+    {
+      "name": "Health check",
+      "method": "GET",
+      "endpoint": "/health",
+      "expected_status": 200,
+      "expected_response": {"status": "ok"}
+    },
+    {
+      "name": "Consultar saldo válido",
+      "method": "GET",
+      "endpoint": "/wallet/11111111-1111-1111-1111-111111111111",
+      "expected_status": 200,
+      "expected_response": {
+        "user_id": "11111111-1111-1111-1111-111111111111",
+        "saldo": 1500.75,
+        "status": "ATIVA"
+      }
+    },
+    {
+      "name": "Consultar extrato válido",
+      "method": "GET",
+      "endpoint": "/wallet/11111111-1111-1111-1111-111111111111/statement",
+      "expected_status": 200,
+      "expected_response": [
+        {
+          "id": "22222222-2222-2222-2222-222222222222",
+          "wallet_id": "33333333-3333-3333-3333-333333333333",
+          "tipo": "CREDITO",
+          "valor": 250.00,
+          "descricao": "Depósito inicial",
+          "referencia": "44444444-4444-4444-4444-444444444444",
+          "created_at": "2026-07-03T12:00:00"
+        }
+      ]
+    },
+    {
+      "name": "Crédito na carteira",
+      "method": "POST",
+      "endpoint": "/wallet/credit",
+      "body": {
+        "user_id": "11111111-1111-1111-1111-111111111111",
+        "valor": 250.00,
+        "descricao": "Depósito",
+        "referencia": "55555555-5555-5555-5555-555555555555"
+      },
+      "expected_status": 200
+    },
+    {
+      "name": "Débito na carteira",
+      "method": "POST",
+      "endpoint": "/wallet/debit",
+      "body": {
+        "user_id": "11111111-1111-1111-1111-111111111111",
+        "valor": 120.50,
+        "descricao": "Pagamento PIX",
+        "referencia": "66666666-6666-6666-6666-666666666666"
+      },
+      "expected_status": 200
+    },
+    {
+      "name": "Saldo insuficiente",
+      "method": "POST",
+      "endpoint": "/wallet/debit",
+      "body": {
+        "user_id": "11111111-1111-1111-1111-111111111111",
+        "valor": 999999.99,
+        "descricao": "Pagamento grande",
+        "referencia": "77777777-7777-7777-7777-777777777777"
+      },
+      "expected_status": 409,
+      "expected_response": {"detail": "Saldo insuficiente"}
+    },
+    {
+      "name": "Usuário inexistente",
+      "method": "GET",
+      "endpoint": "/wallet/99999999-9999-9999-9999-999999999999",
+      "expected_status": 404,
+      "expected_response": {"detail": "Usuário não encontrado"}
+    }
+  ]
+}
